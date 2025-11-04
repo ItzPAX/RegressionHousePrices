@@ -2,8 +2,6 @@ import kagglehub
 import pandas as pd
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
@@ -13,7 +11,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.base import BaseEstimator, TransformerMixin
 
-def hyperparam_pipeline_eval(pipeline, params):
+def hyperparam_pipeline_eval(pipeline, params, X_train, Y_train, X_test, Y_test):
     grid_search = GridSearchCV(pipeline, params, cv=5, scoring="neg_mean_squared_error", return_train_score=True)
     grid_search.fit(X_train, Y_train)
 
@@ -28,7 +26,7 @@ def build_eval_pipeline(preprocessor, regressor):
         ('regressor', regressor)
     ])
 
-def eval_pipeline(pipeline):
+def eval_pipeline(pipeline, X_train, Y_train, X_test, Y_test):
     print("Training model...")
     pipeline.fit(X_train, Y_train)
     score = pipeline.score(X_test, Y_test)
@@ -36,7 +34,7 @@ def eval_pipeline(pipeline):
 
 class FeatureEngineer(BaseEstimator, TransformerMixin):
     def __init__(self):
-        print('Initialising transformer')
+        pass
     
     def fit(self, X, y = None):
         return self
@@ -90,10 +88,10 @@ if __name__ == "__main__":
     lr_pipeline = build_eval_pipeline(preprocessor, LinearRegression())
     rfr_pipeline = build_eval_pipeline(preprocessor, RandomForestRegressor())
 
-    eval_pipeline(lr_pipeline)
-    eval_pipeline(rfr_pipeline)
+    eval_pipeline(lr_pipeline, X_train, Y_train, X_test, Y_test)
+    eval_pipeline(rfr_pipeline, X_train, Y_train, X_test, Y_test)
 
     param_grid = {
-        'n_estimators': [50, 80, 100],
+        'regressor__n_estimators': [50, 80, 100],
     }
-    hyperparam_pipeline_eval(rfr_pipeline, param_grid)
+    hyperparam_pipeline_eval(rfr_pipeline, param_grid, X_train, Y_train, X_test, Y_test)
